@@ -1,0 +1,22 @@
+﻿<Window x:Name="MainWindow1" x:Class="QueryWatchedMovies.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:QueryWatchedMovies"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="650" HorizontalAlignment="Left">
+    <Grid Background="{DynamicResource {x:Static SystemColors.GradientActiveCaptionBrushKey}}">
+        <TextBox x:Name="SearchBox" HorizontalAlignment="Left" Height="29" Margin="45,36,0,0" TextWrapping="Wrap" Text="Enter Movie Name Here" VerticalAlignment="Top" Width="553" TextChanged="textBox_TextChanged" FontSize="14">
+            <TextBox.Effect>
+                <DropShadowEffect Opacity="0.5" ShadowDepth="10"/>
+            </TextBox.Effect>
+        </TextBox>
+        <ListBox x:Name="WatchedMovies" Height="316" Margin="45,70,45,0" VerticalAlignment="Top" SelectionChanged="WatchedMovies_SelectionChanged" FontFamily="Calibri">
+            <ListBox.Effect>
+                <DropShadowEffect Opacity="0.5" ShadowDepth="3" Color="#FF1F1D2B"/>
+            </ListBox.Effect>
+        </ListBox>
+
+    </Grid>
+</Window>
