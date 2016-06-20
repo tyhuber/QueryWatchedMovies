@@ -9,7 +9,7 @@
     <Grid Background="{DynamicResource {x:Static SystemColors.GradientActiveCaptionBrushKey}}">
         <TextBox x:Name="SearchBox" HorizontalAlignment="Left" Height="29" Margin="45,36,0,0" TextWrapping="Wrap" Text="Enter Movie Name Here" VerticalAlignment="Top" Width="553" TextChanged="textBox_TextChanged" FontSize="14">
             <TextBox.Effect>
-                <DropShadowEffect Opacity="0.5" ShadowDepth="10"/>
+                <DropShadowEffect Opacity="0.5" ShadowDepth="3"/>
             </TextBox.Effect>
         </TextBox>
         <ListBox x:Name="WatchedMovies" Height="316" Margin="45,70,45,0" VerticalAlignment="Top" SelectionChanged="WatchedMovies_SelectionChanged" FontFamily="Calibri">

@@ -76,6 +76,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Cfg\Config.cs" />
+    <Compile Include="Extensions\MiscExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -83,6 +84,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Movies\Converters\BaseConverter.cs" />
+    <Compile Include="Movies\Converters\DateConverter.cs" />
+    <Compile Include="Movies\Converters\DoubleConverter.cs" />
+    <Compile Include="Movies\Converters\GenreConverter.cs" />
+    <Compile Include="Movies\Converters\SizeConverter.cs" />
     <Compile Include="Movies\Movie.cs" />
     <Compile Include="Movies\MovieMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
