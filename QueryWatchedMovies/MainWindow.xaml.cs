@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using CsvHelper;
 using IpaExtensions.FileSystem;
+using IpaExtensions.IEnumerables;
 using IpaExtensions.Objects;
 using QueryWatchedMovies.Cfg;
 using QueryWatchedMovies.Movies;
@@ -26,45 +27,92 @@ namespace QueryWatchedMovies
     /// </summary>
     public partial class MainWindow : Window
     {
-        private const string DefaultCsvPath = @"C:\WatchedMedia\WatchedMovies.csv";
+        public const string DefaultWatchedPath = @"C:\WatchedMedia\WatchedMovies.csv";
 
-        private static string CsvPath { get; set; }
+        public static FileInfo WatchedCsvFile => Config?.WatchedCsvFile;
+        public static FileInfo DownloadedCsvFile => Config?.DownloadedCsvFile;
 
-        private static Config Config { get; set; }
+        public static Config Config { get; set; }
         private static bool Valid { get; set; }
 
-        public List<Movie> Movies { get; set; }
+        public List<Movie> WatchedMovieList { get; set; }
+        public List<Movie> DownloadedMovieList { get; set; }
 
         public MainWindow()
         {
             InitializeComponent();
+            if (DeserializeConfig()) return;
+            PopulateListBoxes();
+        }
+
+        private void PopulateListBoxes()
+        {
+            WatchedMovieList = WatchedCsvFile.DeserializeCsv<Movie, MovieMap>();
+            DownloadedMovieList = DownloadedCsvFile.DeserializeCsv<Movie, MovieMap>();
+            if (!WatchedMovieList.Any() && !DownloadedMovieList.Any())
+            {
+                Error($"No movies found in either {WatchedCsvFile.FullName} or {DownloadedCsvFile.FullName}");
+            }
+            if (WatchedMovieList.Any())
+            {
+                WatchedMovies.ItemsSource = WatchedMovieList;
+            }
+            else
+            {
+                WatchedMovies.ItemsSource = new[] {$"No movies found in {WatchedCsvFile.FullName}"};
+            }
+            if (DownloadedMovieList.Any())
+            {
+                DownloadedMovies.ItemsSource = DownloadedMovieList;
+            }
+            else
+            {
+                WatchedMovies.ItemsSource = new[] {$"No movies found in {DownloadedCsvFile.FullName}"};
+            }
+        }
+
+        private bool DeserializeConfig()
+        {
             Valid = true;
             FileInfo configFileInfo = Directory.GetCurrentDirectory().GetFileInfo("Config.xml");
-            CsvPath = DefaultCsvPath;
             if (configFileInfo.ExistsNow())
             {
                 Config = configFileInfo.DeserializeXml<Config>();
-                if (Config != default(Config))
-                {
-                    CsvPath = Config.CsvPath;
-                }
             }
-            if (!CsvPath.Exists())
+            if (!Config.Valid)
             {
-                MessageBox.Show(this, $"Error: Csv path {CsvPath} does not exist. Unable to populate watched movies.");
-                Valid = false;
+                var invalidSettings = Config.GetInvalidSettings();
+                Error(
+                    $"Error - Settings are invalid: \n{invalidSettings.StringJoin("\n\t")}. \nUnable to populate watched movies.");
                 Application.Current.Shutdown(1);
-                return;
+                return true;
             }
-            PopulateWatchedMovies();
+            return false;
+        }
+
+        private void Error(string error)
+        {
+            MessageBox.Show(this, error);
+            Valid = false;
         }
 
         private void textBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             string searchText = SearchBox.Text;
-            if(Movies==null||!Movies.Any())return;
-            var filteredMovies = Movies.Where(x => x.Title.ToLowerInvariant().Contains(searchText.ToLowerInvariant()));
-            WatchedMovies.ItemsSource = filteredMovies;
+            IEnumerable<Movie> filteredWatchedMovies;
+            if (!FilterMovies(WatchedMovieList, searchText, out filteredWatchedMovies)) return;
+            WatchedMovies.ItemsSource = filteredWatchedMovies;
+            IEnumerable<Movie> filteredDownloadedMovies;
+            if (!FilterMovies(DownloadedMovieList, searchText, out filteredDownloadedMovies)) return;
+            DownloadedMovies.ItemsSource = filteredDownloadedMovies;
+        }
+
+        private static bool FilterMovies(List<Movie> movies, string searchText, out IEnumerable<Movie> filteredMovies)
+        {
+            filteredMovies=new Movie[0];
+            if (movies == null || !movies.Any()) return false;
+            filteredMovies = movies.Where(x => x.Title.ToLowerInvariant().Contains(searchText.ToLowerInvariant()));
+            return true;
         }
 
         private void WatchedMovies_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -74,18 +122,8 @@ namespace QueryWatchedMovies
 
         private void PopulateMoviesButton_Click(object sender, RoutedEventArgs e)
         {
-            PopulateWatchedMovies();
-            MessageBox.Show(this,$"Got {Movies.Count} movies.");
-        }
-
-        private void PopulateWatchedMovies()
-        {
-            using (var csv = new CsvReader(new StreamReader(DefaultCsvPath)))
-            {
-                csv.Configuration.RegisterClassMap<MovieMap>();
-                Movies = csv.GetRecords<Movie>().ToList();
-            }
-            WatchedMovies.ItemsSource = Movies;
+            /*MovieCollection.GetMoviesFromCsv(DefaultWatchedPath);
+            MessageBox.Show(this,$"Got {Movies.Count} movies.");*/
         }
     }
 }
